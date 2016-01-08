@@ -3,11 +3,10 @@ var React = require('react');
 var TweetsApp = React.createFactory(require('./components/TweetsApp.react'));
 var Tweet = require('./models/Tweet');
 var etag = require('etag');
-
 var fresh = require('fresh');
 
-var cachedEtag = null;
-var lastModify = null;
+// var cachedEtag = null;  // to store Etag
+
 
 module.exports = {
 
@@ -15,9 +14,9 @@ module.exports = {
      console.log("--------------------Begin----------------------------");
      //Server side set 404 to test
      // res.status(404).end();
-     
+
      //check res length
-     console.log("Res etag = " + cachedEtag );
+     console.log("Res etag = " + res.app.locals.etag );
      console.log("Res etag = " + res.get('ETag'));
      console.log("Req etag = " + req.headers["if-none-match"]);
      // check etag
@@ -26,7 +25,7 @@ module.exports = {
      // return the 304 if the Etag is the same
      if (req.headers["if-none-match"] !== null) {
          // Except First time
-         if (cachedEtag === req.headers["if-none-match"]) {
+         if (res.app.locals.etag === req.headers["if-none-match"]) {
              return res.status(304).end();
          }
      }
@@ -74,9 +73,9 @@ module.exports = {
 
           // Reset the etag
           // res.setHeader('ETag', etag(JSON.stringify(applicationTweets)));
-          cachedEtag = etag(JSON.stringify(applicationTweets));
+          res.app.locals.etag = etag(JSON.stringify(tweets));
           // lastModify = ...
-          res.set('ETag', cachedEtag);
+          res.set('ETag', res.app.locals.etag);
 
           // Render our 'home' template
           res.render('home', {

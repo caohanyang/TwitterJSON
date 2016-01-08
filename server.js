@@ -7,6 +7,10 @@ var twitter = require('twitter');
 var routes = require('./routes');
 var config = require('./config');
 var streamHandler = require('./utils/streamHandler');
+var dataHandler = require('./utils/dataHandler');
+var schedule = require('node-schedule');
+
+// var cachedEtag = null;  // to store Etag
 
 // Create an express instance and set a port variable
 var app = express();
@@ -39,6 +43,14 @@ app.use('/', express.static(__dirname + '/public/'));
 var server = http.createServer(app).listen(port, function() {
     console.log('Express server listening on port' + port);
 });
+// server update the Etag every 5 seconds
+app.locals.etag = null;  // server based etag
+
+var freshEtag = schedule.scheduleJob('*/5 * * * * *', function(){
+  console.log('Server automatic update the Etag');
+  dataHandler.updateEtag(app);
+});
+
 
 // Initialize socket.io 
 var io = require('socket.io').listen(server);
@@ -47,4 +59,5 @@ var io = require('socket.io').listen(server);
 // #streamio ???
 twit.stream('statuses/filter', { track: 'javascript'}, function(stream) {
      streamHandler(stream, io);
-})
+});
+
