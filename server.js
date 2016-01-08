@@ -16,9 +16,9 @@ var port = process.env.PORT || 8080;
 app.engine('handlebars', exphbs({ defaultLayout: 'main'}));
 app.set('view engine', 'handlebars');
 
-// Disable etag headers on responses
+// Enable etag headers on responses
 // etag ?
-app.disable('etag');
+app.enable('etag');
 
 // Connect to our mongo database
 // 'mongodb://localhost:27017/react-tweets'
